@@ -1,24 +1,35 @@
 #ifndef PAGE_H
 #define PAGE_H
 
-#include <iostream>
+#include <cstring>
 
 const int PAGE_SIZE = 4096;
 
-struct Page{
+struct Header {
+    int numSlots;
+    int freeSpaceOffset;
+};
+
+struct Slot {
+    int offset;
+    int size;
+};
+
+struct Page {
     int page_id;
     int next_page;
-    int data_count;
 
-    char buffer[PAGE_SIZE - (sizeof(int)*3)];
+    char buffer[PAGE_SIZE - (sizeof(int) * 2)];
+
     Page() {
         page_id = -1;
         next_page = -1;
-        data_count = 0;
-        for(int i = 0; i < (PAGE_SIZE - 12); i++) buffer[i] = 0;
+        Header* h = reinterpret_cast<Header*>(buffer);
+        h->numSlots = 0;
+        h->freeSpaceOffset = sizeof(buffer);
+
+        memset(buffer + sizeof(Header), 0, sizeof(buffer) - sizeof(Header));
     }
-
-
 };
 
 #endif
