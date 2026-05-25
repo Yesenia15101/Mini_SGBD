@@ -1,21 +1,26 @@
 #ifndef PAGEMANAGER_H
 #define PAGEMANAGER_H
 
+#include <cstdio>
 #include <string>
-#include <fstream>
 #include "Page.h"
 
 class PageManager{
-    private:
-        std::fstream file;
-        std::string file_name;
-    public:
-    PageManager(std::string name);
+private:
+    FILE* file;
+    std::string file_name;
+    bool seek_page(int id);
+
+public:
+    PageManager(const std::string& name);
     ~PageManager();
-    bool write_page(int id, const Page& p);
+
+    bool write_page(int id,const Page& p);
+    bool read_page(int id,Page& p);
     Page read_page(int id);
 
-
+    bool sync();
+    bool is_open() const;
 };
 
 #endif

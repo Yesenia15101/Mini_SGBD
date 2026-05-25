@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_executable(hi
+add_executable(minisgbd
     src/main.cpp
-    src/page_manager.cpp
+    src/PageManager.cpp
+    src/JournalManager.cpp
 )

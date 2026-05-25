@@ -1,34 +1,101 @@
-
 #include "../include/PageManager.h"
-#include <iostream>
-#include <fstream>
+#include <cstring>
+#include <cstdint>
 
-PageManager::PageManager(std::string name) : file_name(name){
-    file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
-    if (!file.is_open()) {
-        file.open(file_name, std::ios::out | std::ios::binary);
-        file.close();
-        file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
-    }
+static_assert(sizeof(Page)==PAGE_SIZE,"Page debe medir exactamente PAGE_SIZE bytes");
+
+PageManager::PageManager(const std::string& name):file(nullptr),file_name(name){
+    file=std::fopen(file_name.c_str(),"r+b");
+    if(file==nullptr)
+        file=std::fopen(file_name.c_str(),"w+b");
 }
+
 PageManager::~PageManager(){
-    if (file.is_open()) {
-        file.close();
-    }
-}
-bool PageManager::write_page(int id, const Page& p) {
-    long offset = (long)id * PAGE_SIZE;
-    file.seekp(offset, std::ios::beg);
-    file.write(reinterpret_cast<const char*>(&p), PAGE_SIZE);
-    file.flush();
-    return file.good();
+    if(file!=nullptr)
+        std::fclose(file);
 }
 
-Page PageManager::read_page(int id) {
+bool PageManager::is_open() const{
+    return file!=nullptr;
+}
+
+bool PageManager::seek_page(int id){
+    if(file==nullptr || id<0)
+        return false;
+
+    long offset=static_cast<long>(id)*PAGE_SIZE;
+
+    return std::fseek(file,offset,SEEK_SET)==0;
+}
+
+bool PageManager::write_page(int id,const Page& p){
+    if(!seek_page(id))
+        return false;
+
+    std::clearerr(file);
+
+    size_t written=std::fwrite(reinterpret_cast<const char*>(&p),1,PAGE_SIZE,file);
+
+    if(written!=PAGE_SIZE)
+        return false;
+
+    return std::fflush(file)==0;
+}
+
+bool PageManager::read_page(int id,Page& p){
+    if(!seek_page(id))
+        return false;
+
+    std::clearerr(file);
+
+    size_t readed=std::fread(reinterpret_cast<char*>(&p),1,PAGE_SIZE,file);
+
+    return readed==PAGE_SIZE;
+}
+
+Page PageManager::read_page(int id){
     Page p;
-    long offset = (long)id * PAGE_SIZE;
-    file.seekg(offset, std::ios::beg);
-    file.read(reinterpret_cast<char*>(&p), PAGE_SIZE);
+    std::memset(&p,0,sizeof(Page));
+    read_page(id,p);
     return p;
+}
+
+bool PageManager::sync(){
+    if(file==nullptr)
+        return false;
+
+    if(std::fflush(file)!=0)
+        return false;
+
+#ifdef _WIN32
+    HANDLE h=CreateFileA(
+        file_name.c_str(),
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    if(h==INVALID_HANDLE_VALUE)
+        return false;
+
+    BOOL ok=FlushFileBuffers(h);
+    CloseHandle(h);
+
+    return ok!=0;
+#else
+    int fd=fileno(file);
+    if(fd==-1)
+        return false;
+
+    return fsync(fd)==0;
+#endif
 }
