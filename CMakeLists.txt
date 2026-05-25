@@ -10,4 +10,6 @@ add_executable(minisgbd
     src/main.cpp
     src/PageManager.cpp
     src/JournalManager.cpp
+    src/SlottedPage.cpp
+    src/BufferManager.cpp
 )

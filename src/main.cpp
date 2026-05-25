@@ -3,6 +3,7 @@
 #include <cstring>
 #include "../include/PageManager.h"
 #include "../include/SlottedPage.h"
+#include "../include/BufferManager.h"
 
 void mostrar_registro(Page& page, uint16_t slot_id){
     char salida[200];
@@ -105,6 +106,18 @@ int main(){
     db.sync();
 
     std::cout << "\nPrueba de Slot Directory finalizada correctamente.\n";
+
+    std::cout << "\n===== BUFFER MANAGER TEST =====\n";
+
+    BufferManager bm(2, db);
+
+    Page* p1 = bm.fetchPage(2);
+
+    if(p1){
+        std::cout << "Pagina 2 cargada en RAM correctamente.\n";
+    }else{
+        std::cout << "Error cargando pagina 2.\n";
+    }
 
     return 0;
 }
