@@ -1,0 +1,3 @@
+/workspaces/Mini_SGBD/build/CMakeFiles/minisgbd.dir
+/workspaces/Mini_SGBD/build/CMakeFiles/edit_cache.dir
+/workspaces/Mini_SGBD/build/CMakeFiles/rebuild_cache.dir

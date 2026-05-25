@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/minisgbd.dir/src/main.cpp.o CMakeFiles/minisgbd.dir/src/PageManager.cpp.o CMakeFiles/minisgbd.dir/src/JournalManager.cpp.o CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o -o minisgbd 

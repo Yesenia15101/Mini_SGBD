@@ -118,6 +118,28 @@ int main(){
     }else{
         std::cout << "Error cargando pagina 2.\n";
     }
+    Page page_extra;
+
+    SlottedPage::init(page_extra, 3);
+
+    db.write_page(3, page_extra);
+
+    Page* p3 = bm.fetchPage(3);
+
+    if(p3){
+        std::cout << "Pagina 3 cargada.\n";
+    }
+    Page another;
+
+    SlottedPage::init(another, 4);
+
+    db.write_page(4, another);
+
+    Page* p4 = bm.fetchPage(4);
+
+    if(p4 == nullptr){
+        std::cout << "Buffer Pool lleno.\n";
+    }
 
     return 0;
 }
