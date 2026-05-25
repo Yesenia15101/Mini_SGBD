@@ -141,6 +141,10 @@ bool JournalManager::save_page_before_change(int page_id,const Page& original){
 }
 
 bool JournalManager::rollback(PageManager& db){
+    if(journal!=nullptr){
+    std::fclose(journal);
+    journal=nullptr;
+    }
     int count=0;
 
     if(!read_header(count))
