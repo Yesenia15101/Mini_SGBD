@@ -18,6 +18,7 @@ private:
 public:
     BufferManager( int pool_size, PageManager& pm );
     Page* fetchPage(int page_id);
+    int findVictim();
 };
 
 #endif

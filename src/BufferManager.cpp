@@ -5,21 +5,80 @@ BufferManager::BufferManager( int pool_size, PageManager& pm ): disk(pm), clock(
 }
 
 Page* BufferManager::fetchPage(int page_id) {
-    if (page_table.count(page_id)) {
+    if(page_table.count(page_id)) {
+
         int frame_index = page_table[page_id];
+
         Frame& frame = pool[frame_index];
+
         frame.last_used = clock++;
+        frame.pin_count++;
+
         return &frame.page;
     }
-    for (int i = 0; i < pool.size(); i++){
-        if (!pool[i].occupied) {
+
+    for(int i = 0; i < pool.size(); i++) {
+
+        if(!pool[i].occupied) {
+
             pool[i].page = disk.read_page(page_id);
+
             pool[i].occupied = true;
             pool[i].page_id = page_id;
             pool[i].last_used = clock++;
+            pool[i].pin_count = 1;
+            pool[i].dirty = false;
+
             page_table[page_id] = i;
+
             return &pool[i].page;
         }
     }
-    return nullptr;
+
+    int victim = findVictim();
+
+    if(victim == -1)
+        return nullptr;
+
+    if(pool[victim].dirty) {
+
+        disk.write_page(
+            pool[victim].page_id,
+            pool[victim].page
+        );
+    }
+
+    page_table.erase(
+        pool[victim].page_id
+    );
+
+    pool[victim].page =
+        disk.read_page(page_id);
+
+    pool[victim].page_id = page_id;
+    pool[victim].last_used = clock++;
+    pool[victim].dirty = false;
+    pool[victim].pin_count = 1;
+    pool[victim].occupied = true;
+
+    page_table[page_id] = victim;
+
+    return &pool[victim].page;
+}
+int BufferManager::findVictim() {
+    int victim = -1;
+    uint64_t oldest = UINT64_MAX;
+
+    for(int i=0;i<pool.size();i++) {
+
+        if(pool[i].pin_count > 0)
+            continue;
+
+        if(pool[i].last_used < oldest) {
+            oldest = pool[i].last_used;
+            victim = i;
+        }
+    }
+
+    return victim;
 }
