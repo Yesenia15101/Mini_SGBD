@@ -18,6 +18,8 @@ private:
 public:
     BufferManager( int pool_size, PageManager& pm );
     Page* fetchPage(int page_id);
+    bool unpinPage(int page_id, bool dirty);
+    bool flushPage(int page_id);
     int findVictim();
 };
 

@@ -8,4 +8,5 @@ add_executable(minisgbd
     src/JournalManager.cpp
     src/SlottedPage.cpp
     src/BufferManager.cpp
+    src/BPlusTree.cpp
 )

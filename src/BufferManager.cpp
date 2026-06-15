@@ -65,6 +65,39 @@ Page* BufferManager::fetchPage(int page_id) {
 
     return &pool[victim].page;
 }
+
+bool BufferManager::unpinPage(int page_id, bool dirty) {
+    if(!page_table.count(page_id))
+        return false;
+
+    Frame& frame = pool[page_table[page_id]];
+
+    if(frame.pin_count > 0)
+        frame.pin_count--;
+
+    if(dirty)
+        frame.dirty = true;
+
+    return true;
+}
+
+bool BufferManager::flushPage(int page_id) {
+    if(!page_table.count(page_id))
+        return false;
+
+    Frame& frame = pool[page_table[page_id]];
+
+    if(!frame.occupied)
+        return false;
+
+    if(!disk.write_page(page_id, frame.page))
+        return false;
+
+    frame.dirty = false;
+
+    return true;
+}
+
 int BufferManager::findVictim() {
     int victim = -1;
     uint64_t oldest = UINT64_MAX;
