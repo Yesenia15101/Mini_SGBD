@@ -68,6 +68,27 @@ void imprimir_rango_desde_indice(PageManager& db, BPlusTree& indice, int inicio,
     }
 }
 
+std::string generar_nombre_alumno(int id){
+    static const char* nombres[] = {
+        "Ana", "Luis", "Maria", "Carlos", "Lucia",
+        "Jorge", "Valeria", "Diego", "Camila", "Mateo",
+        "Sofia", "Andres", "Daniela", "Sebastian", "Fernanda",
+        "Ricardo", "Paola", "Miguel", "Gabriela", "Alejandro"
+    };
+
+    static const char* apellidos[] = {
+        "Quispe", "Mamani", "Flores", "Garcia", "Vargas",
+        "Rojas", "Torres", "Condori", "Huaman", "Castillo",
+        "Lopez", "Ramirez", "Chavez", "Paredes", "Medina",
+        "Salas", "Cruz", "Herrera", "Mendoza", "Aguilar"
+    };
+
+    int nombre_index = (id - 1) % 20;
+    int apellido_index = ((id - 1) / 20) % 20;
+
+    return std::string(nombres[nombre_index]) + " " + apellidos[apellido_index];
+}
+
 void demo_bplustree_1000_registros(bool imprimir_todos){
     std::remove("test_bplustree_1000.db");
 
@@ -96,8 +117,8 @@ void demo_bplustree_1000_registros(bool imprimir_todos){
 
         for(int id = 1; id <= total_registros; id++){
             std::string registro = std::to_string(id) +
-                                   "|Alumno_" +
-                                   std::to_string(id) +
+                                   "|" +
+                                   generar_nombre_alumno(id) +
                                    "|" +
                                    std::to_string(18 + (id % 10));
 
