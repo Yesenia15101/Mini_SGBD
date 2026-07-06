@@ -21,6 +21,7 @@ public:
     bool unpinPage(int page_id, bool dirty);
     bool flushPage(int page_id);
     int findVictim();
+    int allocatePage();
 };
 
 #endif

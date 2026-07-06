@@ -99,3 +99,23 @@ bool PageManager::sync(){
     return fsync(fd)==0;
 #endif
 }
+int PageManager::allocate_page(){
+
+    if(file == nullptr)
+        return -1;
+
+    std::fseek(file, 0, SEEK_END);
+
+    long size = std::ftell(file);
+
+    int new_page_id = size / PAGE_SIZE;
+
+    Page empty;
+    std::memset(&empty, 0, sizeof(Page));
+
+    write_page(new_page_id, empty);
+
+    sync();
+
+    return new_page_id;
+}

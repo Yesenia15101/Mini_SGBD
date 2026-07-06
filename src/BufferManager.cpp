@@ -115,3 +115,11 @@ int BufferManager::findVictim() {
 
     return victim;
 }
+int BufferManager::allocatePage(){
+
+    int new_page = disk.allocate_page();
+
+    fetchPage(new_page);
+
+    return new_page;
+}

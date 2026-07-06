@@ -21,6 +21,7 @@ public:
 
     bool sync();
     bool is_open() const;
+    int allocate_page();
 };
 
 #endif

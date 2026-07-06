@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o"
+  "CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o.d"
   "CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o"
   "CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o.d"
   "CMakeFiles/minisgbd.dir/src/JournalManager.cpp.o"

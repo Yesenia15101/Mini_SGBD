@@ -60,12 +60,22 @@ private:
     int root_page_id;
 
     int choose_child(const Page& internal_node, int key) const;
+    Page* find_leaf( int key, int& leaf_page_id);
+    bool insert_into_leaf( Page& leaf, int key, RID rid);
+    bool split_leaf( int leaf_page_id, int key, RID rid);
+    bool insert_into_parent( int left_page,int promoted_key,int right_page);
+    bool split_internal(int internal_page,int left_page,int promoted_key,int right_page);
 
 public:
     BPlusTree(BufferManager& bm, int root_page_id);
+    static int get_parent_page_id(const Page& page);
+    static void set_parent_page_id(Page& page, int parent);
 
     bool create_empty_tree();
     bool search(int key, RID& rid);
+    bool insert(int key,RID rid);
+    bool remove(int key);
+    
 };
 
 #endif

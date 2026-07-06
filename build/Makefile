@@ -129,6 +129,30 @@ minisgbd/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/build
 .PHONY : minisgbd/fast
 
+src/BPlusTree.o: src/BPlusTree.cpp.o
+.PHONY : src/BPlusTree.o
+
+# target to build an object file
+src/BPlusTree.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o
+.PHONY : src/BPlusTree.cpp.o
+
+src/BPlusTree.i: src/BPlusTree.cpp.i
+.PHONY : src/BPlusTree.i
+
+# target to preprocess a source file
+src/BPlusTree.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.i
+.PHONY : src/BPlusTree.cpp.i
+
+src/BPlusTree.s: src/BPlusTree.cpp.s
+.PHONY : src/BPlusTree.s
+
+# target to generate assembly for a file
+src/BPlusTree.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.s
+.PHONY : src/BPlusTree.cpp.s
+
 src/BufferManager.o: src/BufferManager.cpp.o
 .PHONY : src/BufferManager.o
 
@@ -258,6 +282,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... minisgbd"
+	@echo "... src/BPlusTree.o"
+	@echo "... src/BPlusTree.i"
+	@echo "... src/BPlusTree.s"
 	@echo "... src/BufferManager.o"
 	@echo "... src/BufferManager.i"
 	@echo "... src/BufferManager.s"

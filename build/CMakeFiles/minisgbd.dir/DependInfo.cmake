@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/workspaces/Mini_SGBD/src/BPlusTree.cpp" "CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o.d"
   "/workspaces/Mini_SGBD/src/BufferManager.cpp" "CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o.d"
   "/workspaces/Mini_SGBD/src/JournalManager.cpp" "CMakeFiles/minisgbd.dir/src/JournalManager.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/JournalManager.cpp.o.d"
   "/workspaces/Mini_SGBD/src/PageManager.cpp" "CMakeFiles/minisgbd.dir/src/PageManager.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/PageManager.cpp.o.d"
