@@ -266,7 +266,6 @@ bool BPlusTree::search(int key, RID& rid){
 Page* BPlusTree::find_leaf(int key, int& leaf_page_id){
 
     leaf_page_id = root_page_id;
-
     while(true){
 
         Page* current = buffer.fetchPage(leaf_page_id);
@@ -305,15 +304,13 @@ bool BPlusTree::split_internal(int internal_page,int left_page,int promoted_key,
     std::vector<int> keys;
     std::vector<int> children;
 
-    for(uint16_t i = 0; i < count; i++)
-    {
+    for(uint16_t i = 0; i < count; i++){
         int k;
         BPlusTreeNode::get_internal_key(*old_node,i,k);
         keys.push_back(k);
     }
 
-    for(uint16_t i = 0; i < count + 1; i++)
-    {
+    for(uint16_t i = 0; i < count + 1; i++){
         int c;
         BPlusTreeNode::get_internal_child(*old_node,i,c);
         children.push_back(c);
@@ -321,37 +318,27 @@ bool BPlusTree::split_internal(int internal_page,int left_page,int promoted_key,
 
     int pos = 0;
 
-    while(pos < children.size())
-    {
+    while(pos < children.size()){
         if(children[pos] == left_page)
             break;
         pos++;
     }
 
-    if(pos == children.size())
-    {
+    if(pos == children.size()){
         buffer.unpinPage(internal_page,false);
         return false;
     }
 
-    if(pos > count)
-    {
+    if(pos > count){
         buffer.unpinPage(internal_page,false);
         return false;
     }
 
-    keys.insert(
-        keys.begin() + pos,
-        promoted_key
-    );
+    keys.insert( keys.begin() + pos,promoted_key);
 
-    children.insert(
-        children.begin() + pos + 1,
-        right_page
-    );
+    children.insert(children.begin() + pos + 1,right_page );
 
     count++;
-
 
     int middle = keys.size()/2;
 
@@ -361,93 +348,45 @@ bool BPlusTree::split_internal(int internal_page,int left_page,int promoted_key,
 
     Page* right = buffer.fetchPage(new_page);
 
-    if(right == nullptr)
-    {
+    if(right == nullptr){
         buffer.unpinPage(internal_page,false);
         return false;
     }
 
-    BPlusTreeNode::init_internal(
-        *right,
-        new_page,
-        get_parent_page_id(*old_node)
-    );
+    BPlusTreeNode::init_internal(*right, new_page, get_parent_page_id(*old_node));
 
     BPlusTreeNode::set_key_count(*old_node,0);
     BPlusTreeNode::set_key_count(*right,0);
 
-    //-----------------------------------------
     // izquierda
-    //-----------------------------------------
 
-    for(int i=0;i<middle;i++)
-    {
+    for(int i=0;i<middle;i++){
         BPlusTreeNode::set_internal_key(*old_node,i,keys[i]);
         BPlusTreeNode::set_internal_child(*old_node,i,children[i]);
     }
 
-    BPlusTreeNode::set_internal_child(
-        *old_node,
-        middle,
-        children[middle]
-    );
+    BPlusTreeNode::set_internal_child(*old_node, middle,children[middle]);
 
-    BPlusTreeNode::set_key_count(
-        *old_node,
-        middle
-    );
-
-    //-----------------------------------------
+    BPlusTreeNode::set_key_count(   *old_node, middle );
     // derecha
-    //-----------------------------------------
 
     int j=0;
 
-    for(int i = middle + 1; i < keys.size(); i++){
-        BPlusTreeNode::set_internal_key(
-            *right,
-            j,
-            keys[i]
-        );
-
-        BPlusTreeNode::set_internal_child(
-            *right,
-            j,
-            children[i]
-        );
-
-        j++;
+    for(int i = middle + 1; i < keys.size(); i++){ 
+        BPlusTreeNode::set_internal_key( *right, j,  keys[i]);
+        BPlusTreeNode::set_internal_child(*right, j,children[i] ); j++;
     }
+    BPlusTreeNode::set_internal_child( *right,  j, children[count] );
 
-    BPlusTreeNode::set_internal_child(
-        *right,
-        j,
-        children[count]
-    );
+    BPlusTreeNode::set_key_count(   *right,  j  );
 
-    BPlusTreeNode::set_key_count(
-        *right,
-        j
-    );
-
-    //-----------------------------------------
     // Actualizar padres
-    //-----------------------------------------
 
-    for(int i=0;i<=j;i++)
-    {
+    for(int i=0;i<=j;i++){
         int child;
-
-        BPlusTreeNode::get_internal_child(
-            *right,
-            i,
-            child
-        );
-
+        BPlusTreeNode::get_internal_child( *right,  i,  child);
         Page* p = buffer.fetchPage(child);
-
-        if(p == nullptr)
-        {
+        if(p == nullptr){
             buffer.unpinPage(internal_page,false);
             buffer.unpinPage(new_page,false);
             return false;
@@ -481,8 +420,7 @@ bool BPlusTree::insert_into_leaf(Page& leaf, int key, RID rid)
 
     BPlusTreeNode::LeafEntry e;
 
-    for(uint16_t i = 0; i < count; i++)
-    {
+    for(uint16_t i = 0; i < count; i++){
         BPlusTreeNode::get_leaf_entry(leaf, i, e);
 
         // No permitir claves repetidas
@@ -494,19 +432,13 @@ bool BPlusTree::insert_into_leaf(Page& leaf, int key, RID rid)
 
     entries.push_back({key, rid});
 
-    std::sort(
-        entries.begin(),
-        entries.end(),
-        [](const auto& a,const auto& b)
-        {
-            return a.key < b.key;
-        }
+    std::sort(entries.begin(),entries.end(), [](const auto& a,const auto& b) {
+        return a.key < b.key;}
     );
 
     BPlusTreeNode::set_key_count(leaf,0);
 
-    for(uint16_t i=0;i<entries.size();i++)
-    {
+    for(uint16_t i=0;i<entries.size();i++) {
         BPlusTreeNode::set_leaf_entry(
             leaf,
             i,
@@ -525,9 +457,7 @@ bool BPlusTree::insert_into_leaf(Page& leaf, int key, RID rid)
 
 
 bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_page){
-    //--------------------------------------------------
     // Obtener la página izquierda
-    //--------------------------------------------------
     Page* left = buffer.fetchPage(left_page);
 
     if(left == nullptr)
@@ -537,12 +467,9 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
 
     buffer.unpinPage(left_page,false);
 
-    //--------------------------------------------------
     // Caso especial:
     // la hoja era la raíz
-    //--------------------------------------------------
-    if(parent_id == -1)
-    {
+    if(parent_id == -1){
         int new_root_id = buffer.allocatePage();
 
         Page* root = buffer.fetchPage(new_root_id);
@@ -585,9 +512,7 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
         return true;
     }
 
-    //--------------------------------------------------
     // Insertar en un padre existente
-    //--------------------------------------------------
 
     Page* parent = buffer.fetchPage(parent_id);
 
@@ -597,15 +522,11 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
     uint16_t count =
         BPlusTreeNode::key_count(*parent);
 
-    //--------------------------------------------------
     // ¿Hay espacio?
-    //--------------------------------------------------
 
     if(count < BPlusTreeNode::max_internal_keys())
     {
-        //--------------------------------------------------
         // Encontrar posición de left_page
-        //--------------------------------------------------
 
         int pos = 0;
         int child;
@@ -623,13 +544,9 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
 
             pos++;
         }
-
-        //--------------------------------------------------
         // Mover claves
-        //--------------------------------------------------
 
-        for(int i=count;i>pos;i--)
-        {
+        for(int i=count;i>pos;i--) {
             int k;
 
             BPlusTreeNode::get_internal_key(
@@ -644,13 +561,9 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
                 k
             );
         }
-
-        //--------------------------------------------------
         // Mover hijos
-        //--------------------------------------------------
 
-        for(int i=count+1;i>pos+1;i--)
-        {
+        for(int i=count+1;i>pos+1;i--){
             int c;
 
             BPlusTreeNode::get_internal_child(
@@ -666,35 +579,19 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
             );
         }
 
-        //--------------------------------------------------
         // Insertar nueva clave
-        //--------------------------------------------------
 
-        BPlusTreeNode::set_internal_key(
-            *parent,
-            pos,
-            promoted_key
-        );
+        BPlusTreeNode::set_internal_key( *parent, pos, promoted_key );
 
-        BPlusTreeNode::set_internal_child(
-            *parent,
-            pos+1,
-            right_page
-        );
+        BPlusTreeNode::set_internal_child(*parent, pos+1, right_page);
 
-        BPlusTreeNode::set_key_count(
-            *parent,
-            count+1
-        );
+        BPlusTreeNode::set_key_count( *parent, count+1);
 
-        //--------------------------------------------------
         // Actualizar padre del hijo derecho
-        //--------------------------------------------------
 
         Page* right = buffer.fetchPage(right_page);
 
-        if(right == nullptr)
-        {
+        if(right == nullptr){
             buffer.unpinPage(parent_id, true); // el padre ya quedó modificado en memoria
             buffer.flushPage(parent_id);
             return false;
@@ -711,9 +608,7 @@ bool BPlusTree::insert_into_parent(int left_page,int promoted_key, int right_pag
         return true;
     }
 
-    //--------------------------------------------------
     // Padre lleno
-    //--------------------------------------------------
 
     buffer.unpinPage(parent_id,false);
 
@@ -727,9 +622,7 @@ bool BPlusTree::split_leaf(int leaf_page_id, int key, RID rid){
     if(old_leaf == nullptr)
         return false;
 
-    //-------------------------------------------------
     // 1. Copiar todas las entradas
-    //-------------------------------------------------
 
     std::vector<BPlusTreeNode::LeafEntry> entries;
 
@@ -737,16 +630,12 @@ bool BPlusTree::split_leaf(int leaf_page_id, int key, RID rid){
 
     uint16_t count = BPlusTreeNode::key_count(*old_leaf);
 
-    for(uint16_t i=0;i<count;i++)
-    {
+    for(uint16_t i=0;i<count;i++){
         BPlusTreeNode::get_leaf_entry(*old_leaf,i,e);
         entries.push_back(e);
     }
 
-    //-------------------------------------------------
     // 2. Agregar la nueva clave
-    //-------------------------------------------------
-
     entries.push_back({key,rid});
 
     std::sort(
@@ -757,17 +646,14 @@ bool BPlusTree::split_leaf(int leaf_page_id, int key, RID rid){
             return a.key<b.key;
         }
     );
-
-    //-------------------------------------------------
+    
     // 3. Crear nueva hoja
-    //-------------------------------------------------
 
     int new_leaf_id = buffer.allocatePage();
 
     Page* new_leaf = buffer.fetchPage(new_leaf_id);
 
-    if(new_leaf==nullptr)
-    {
+    if(new_leaf==nullptr){
         buffer.unpinPage(leaf_page_id,false);
         return false;
     }
@@ -776,21 +662,16 @@ bool BPlusTree::split_leaf(int leaf_page_id, int key, RID rid){
 
     old_leaf->next_page = new_leaf_id;
 
-    //-------------------------------------------------
     // 4. Vaciar ambas hojas
-    //-------------------------------------------------
 
     BPlusTreeNode::set_key_count(*old_leaf,0);
     BPlusTreeNode::set_key_count(*new_leaf,0);
 
-    //-------------------------------------------------
     // 5. Repartir
-    //-------------------------------------------------
 
     int middle = entries.size()/2;
 
-    for(int i=0;i<middle;i++)
-    {
+    for(int i=0;i<middle;i++){
         BPlusTreeNode::set_leaf_entry(
             *old_leaf,
             i,
@@ -799,15 +680,11 @@ bool BPlusTree::split_leaf(int leaf_page_id, int key, RID rid){
         );
     }
 
-    BPlusTreeNode::set_key_count(
-        *old_leaf,
-        middle
-    );
+    BPlusTreeNode::set_key_count(*old_leaf,middle );
 
     int j=0;
 
-    for(int i=middle;i<entries.size();i++)
-    {
+    for(int i=middle;i<entries.size();i++){
         BPlusTreeNode::set_leaf_entry(
             *new_leaf,
             j,
@@ -822,34 +699,18 @@ bool BPlusTree::split_leaf(int leaf_page_id, int key, RID rid){
         j
     );
 
-    //-------------------------------------------------
     // 6. Promover
-    //-------------------------------------------------
 
-    int promoted =
-        entries[middle].key;
-
-    //-------------------------------------------------
+    int promoted = entries[middle].key;
     // 7. Guardar
-    //-------------------------------------------------
 
-    buffer.unpinPage(
-        leaf_page_id,
-        true
-    );
+    buffer.unpinPage( leaf_page_id,  true);
 
-    buffer.unpinPage(
-        new_leaf_id,
-        true
-    );
+    buffer.unpinPage( new_leaf_id,  true);
 
     buffer.flushPage(leaf_page_id);
     buffer.flushPage(new_leaf_id);
-
-    //-------------------------------------------------
     // 8. Insertar en el padre
-    //-------------------------------------------------
-
     return insert_into_parent(leaf_page_id,promoted,new_leaf_id);
 }
 
