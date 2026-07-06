@@ -177,6 +177,10 @@ bool BPlusTreeNode::validate(const Page& page){
 BPlusTree::BPlusTree(BufferManager& bm, int root_page_id): buffer(bm), root_page_id(root_page_id){
 }
 
+int BPlusTree::get_root_page_id() const{
+    return root_page_id;
+}
+
 bool BPlusTree::create_empty_tree(){
     Page* root = buffer.fetchPage(root_page_id);
 
@@ -742,4 +746,222 @@ bool BPlusTree::insert(int key, RID rid){
     buffer.unpinPage(leaf_page_id, false);
 
     return split_leaf(leaf_page_id, key, rid);
+}
+
+bool BPlusTree::remove_from_leaf(Page& leaf, int key){
+    if(!BPlusTreeNode::is_leaf(leaf))
+        return false;
+
+    uint16_t count = BPlusTreeNode::key_count(leaf);
+    std::vector<BPlusTreeNode::LeafEntry> entries;
+    bool found = false;
+
+    for(uint16_t i = 0; i < count; i++){
+        BPlusTreeNode::LeafEntry entry;
+
+        if(!BPlusTreeNode::get_leaf_entry(leaf, i, entry))
+            return false;
+
+        if(entry.key == key){
+            found = true;
+            continue;
+        }
+
+        entries.push_back(entry);
+    }
+
+    if(!found)
+        return false;
+
+    BPlusTreeNode::set_key_count(leaf, 0);
+
+    for(uint16_t i = 0; i < entries.size(); i++){
+        BPlusTreeNode::set_leaf_entry(
+            leaf,
+            i,
+            entries[i].key,
+            entries[i].rid
+        );
+    }
+
+    BPlusTreeNode::set_key_count(
+        leaf,
+        static_cast<uint16_t>(entries.size())
+    );
+
+    return true;
+}
+
+bool BPlusTree::remove_child_from_parent(int parent_page, int child_page){
+    Page* parent = buffer.fetchPage(parent_page);
+
+    if(parent == nullptr)
+        return false;
+
+    if(BPlusTreeNode::is_leaf(*parent)){
+        buffer.unpinPage(parent_page, false);
+        return false;
+    }
+
+    uint16_t count = BPlusTreeNode::key_count(*parent);
+    int child_index = -1;
+
+    for(uint16_t i = 0; i <= count; i++){
+        int current_child = -1;
+        BPlusTreeNode::get_internal_child(*parent, i, current_child);
+
+        if(current_child == child_page){
+            child_index = i;
+            break;
+        }
+    }
+
+    if(child_index <= 0){
+        buffer.unpinPage(parent_page, false);
+        return false;
+    }
+
+    int key_to_remove = child_index - 1;
+
+    for(uint16_t i = key_to_remove; i + 1 < count; i++){
+        int key = 0;
+        BPlusTreeNode::get_internal_key(*parent, i + 1, key);
+        BPlusTreeNode::set_internal_key(*parent, i, key);
+    }
+
+    for(uint16_t i = child_index; i < count; i++){
+        int child = -1;
+        BPlusTreeNode::get_internal_child(*parent, i + 1, child);
+        BPlusTreeNode::set_internal_child(*parent, i, child);
+    }
+
+    BPlusTreeNode::set_key_count(*parent, count - 1);
+
+    if(parent_page == root_page_id && count - 1 == 0){
+        int only_child = -1;
+        BPlusTreeNode::get_internal_child(*parent, 0, only_child);
+
+        Page* child = buffer.fetchPage(only_child);
+
+        if(child == nullptr){
+            buffer.unpinPage(parent_page, true);
+            buffer.flushPage(parent_page);
+            return false;
+        }
+
+        set_parent_page_id(*child, -1);
+        root_page_id = only_child;
+
+        buffer.unpinPage(only_child, true);
+        buffer.flushPage(only_child);
+    }
+
+    buffer.unpinPage(parent_page, true);
+    buffer.flushPage(parent_page);
+
+    return true;
+}
+
+bool BPlusTree::merge_leaf_with_right(int left_leaf_page, int right_leaf_page, int parent_page){
+    Page* left = buffer.fetchPage(left_leaf_page);
+    Page* right = buffer.fetchPage(right_leaf_page);
+
+    if(left == nullptr || right == nullptr){
+        if(left != nullptr)
+            buffer.unpinPage(left_leaf_page, false);
+
+        if(right != nullptr)
+            buffer.unpinPage(right_leaf_page, false);
+
+        return false;
+    }
+
+    if(!BPlusTreeNode::is_leaf(*left) || !BPlusTreeNode::is_leaf(*right)){
+        buffer.unpinPage(left_leaf_page, false);
+        buffer.unpinPage(right_leaf_page, false);
+        return false;
+    }
+
+    if(get_parent_page_id(*left) != parent_page || get_parent_page_id(*right) != parent_page){
+        buffer.unpinPage(left_leaf_page, false);
+        buffer.unpinPage(right_leaf_page, false);
+        return false;
+    }
+
+    uint16_t left_count = BPlusTreeNode::key_count(*left);
+    uint16_t right_count = BPlusTreeNode::key_count(*right);
+
+    if(left_count + right_count > BPlusTreeNode::max_leaf_keys()){
+        buffer.unpinPage(left_leaf_page, false);
+        buffer.unpinPage(right_leaf_page, false);
+        return false;
+    }
+
+    for(uint16_t i = 0; i < right_count; i++){
+        BPlusTreeNode::LeafEntry entry;
+        BPlusTreeNode::get_leaf_entry(*right, i, entry);
+        BPlusTreeNode::set_leaf_entry(
+            *left,
+            left_count + i,
+            entry.key,
+            entry.rid
+        );
+    }
+
+    BPlusTreeNode::set_key_count(*left, left_count + right_count);
+    left->next_page = right->next_page;
+
+    buffer.unpinPage(left_leaf_page, true);
+    buffer.unpinPage(right_leaf_page, false);
+
+    buffer.flushPage(left_leaf_page);
+
+    return remove_child_from_parent(parent_page, right_leaf_page);
+}
+
+bool BPlusTree::remove(int key){
+    int leaf_page_id = -1;
+    Page* leaf = find_leaf(key, leaf_page_id);
+
+    if(leaf == nullptr)
+        return false;
+
+    int parent_page = get_parent_page_id(*leaf);
+    int right_leaf_page = leaf->next_page;
+
+    bool removed = remove_from_leaf(*leaf, key);
+
+    if(!removed){
+        buffer.unpinPage(leaf_page_id, false);
+        return false;
+    }
+
+    uint16_t new_count = BPlusTreeNode::key_count(*leaf);
+    uint16_t min_leaf_keys = BPlusTreeNode::max_leaf_keys() / 2;
+    bool needs_merge = leaf_page_id != root_page_id &&
+                       parent_page != -1 &&
+                       right_leaf_page != -1 &&
+                       new_count < min_leaf_keys;
+
+    buffer.unpinPage(leaf_page_id, true);
+    buffer.flushPage(leaf_page_id);
+
+    if(!needs_merge)
+        return true;
+
+    Page* right = buffer.fetchPage(right_leaf_page);
+
+    if(right == nullptr)
+        return true;
+
+    bool can_merge = BPlusTreeNode::is_leaf(*right) &&
+                     get_parent_page_id(*right) == parent_page &&
+                     new_count + BPlusTreeNode::key_count(*right) <= BPlusTreeNode::max_leaf_keys();
+
+    buffer.unpinPage(right_leaf_page, false);
+
+    if(can_merge)
+        return merge_leaf_with_right(leaf_page_id, right_leaf_page, parent_page);
+
+    return true;
 }

@@ -65,11 +65,15 @@ private:
     bool split_leaf( int leaf_page_id, int key, RID rid);
     bool insert_into_parent( int left_page,int promoted_key,int right_page);
     bool split_internal(int internal_page,int left_page,int promoted_key,int right_page);
+    bool remove_from_leaf(Page& leaf, int key);
+    bool merge_leaf_with_right(int left_leaf_page, int right_leaf_page, int parent_page);
+    bool remove_child_from_parent(int parent_page, int child_page);
 
 public:
     BPlusTree(BufferManager& bm, int root_page_id);
     static int get_parent_page_id(const Page& page);
     static void set_parent_page_id(Page& page, int parent);
+    int get_root_page_id() const;
 
     bool create_empty_tree();
     bool search(int key, RID& rid);

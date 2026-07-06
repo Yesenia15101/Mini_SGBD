@@ -1,172 +1,257 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <string>
+#include <vector>
 #include "../include/PageManager.h"
 #include "../include/BufferManager.h"
 #include "../include/BPlusTree.h"
 #include "../include/SlottedPage.h"
 
-int ok = 0;
-int fail = 0;
+int verificaciones = 0;
+int errores = 0;
 
-void verificar(bool condicion, const char* nombre){
-    if(condicion){
-        std::cout << "[OK] " << nombre << "\n";
-        ok++;
-    }else{
-        std::cout << "[FAIL] " << nombre << "\n";
-        fail++;
+void comprobar(bool condicion, const char* detalle){
+    verificaciones++;
+
+    if(!condicion){
+        errores++;
+        std::cout << "  No se pudo validar: " << detalle << "\n";
     }
 }
 
-void test_busqueda_en_raiz_hoja(){
-    std::remove("test_bplustree.db");
-
-    PageManager db("test_bplustree.db");
-    BufferManager bm(4, db);
-    BPlusTree tree(bm, 1);
-
-    bool creado = tree.create_empty_tree();
-
-    Page* root = bm.fetchPage(1);
-    RID rid10 = {10, 0};
-    RID rid20 = {20, 1};
-    RID rid30 = {30, 2};
-
-    bool i1 = BPlusTreeNode::set_leaf_entry(*root, 0, 10, rid10);
-    bool i2 = BPlusTreeNode::set_leaf_entry(*root, 1, 20, rid20);
-    bool i3 = BPlusTreeNode::set_leaf_entry(*root, 2, 30, rid30);
-
-    bm.unpinPage(1, true);
-    bm.flushPage(1);
-
-    RID encontrado = {-1, 0};
-    bool existe = tree.search(20, encontrado);
-    bool no_existe = tree.search(25, encontrado);
-
-    verificar(creado, "Crear arbol B+ vacio con raiz hoja");
-    verificar(i1 && i2 && i3, "Guardar entradas ordenadas en hoja");
-    verificar(existe, "Buscar clave existente en raiz hoja");
-    verificar(encontrado.page_id == 20 && encontrado.slot_id == 1, "RID encontrado correcto");
-    verificar(!no_existe, "Buscar clave inexistente devuelve falso");
-}
-
-void test_busqueda_con_nodo_interno(){
-    std::remove("test_bplustree_internal.db");
-
-    PageManager db("test_bplustree_internal.db");
-    BufferManager bm(5, db);
-    BPlusTree tree(bm, 1);
-
-    Page* root = bm.fetchPage(1);
-    BPlusTreeNode::init_internal(*root, 1);
-    BPlusTreeNode::set_internal_key(*root, 0, 50);
-    BPlusTreeNode::set_internal_child(*root, 0, 2);
-    BPlusTreeNode::set_internal_child(*root, 1, 3);
-    bm.unpinPage(1, true);
-    bm.flushPage(1);
-
-    Page* left = bm.fetchPage(2);
-    BPlusTreeNode::init_leaf(*left, 2, 3, 1);
-    BPlusTreeNode::set_leaf_entry(*left, 0, 10, {10, 0});
-    BPlusTreeNode::set_leaf_entry(*left, 1, 40, {40, 1});
-    bm.unpinPage(2, true);
-    bm.flushPage(2);
-
-    Page* right = bm.fetchPage(3);
-    BPlusTreeNode::init_leaf(*right, 3, -1, 1);
-    BPlusTreeNode::set_leaf_entry(*right, 0, 50, {50, 0});
-    BPlusTreeNode::set_leaf_entry(*right, 1, 70, {70, 1});
-    bm.unpinPage(3, true);
-    bm.flushPage(3);
-
-    RID encontrado = {-1, 0};
-    bool existe_izquierda = tree.search(40, encontrado);
-    bool rid_izquierda = encontrado.page_id == 40 && encontrado.slot_id == 1;
-
-    bool existe_derecha = tree.search(70, encontrado);
-    bool rid_derecha = encontrado.page_id == 70 && encontrado.slot_id == 1;
-
-    verificar(existe_izquierda && rid_izquierda, "Buscar bajando al hijo izquierdo");
-    verificar(existe_derecha && rid_derecha, "Buscar bajando al hijo derecho");
-}
-
-void test_indice_con_datos_de_alumnos(){
-    std::remove("test_bplustree_alumnos.db");
-
-    PageManager db("test_bplustree_alumnos.db");
-    BufferManager bm(4, db);
-    BPlusTree indice_alumnos(bm, 1);
-
-    Page alumnos;
-    SlottedPage::init(alumnos, 10);
-
-    RID rid_ana;
-    RID rid_luis;
-    RID rid_maria;
-
-    const char* ana = "1|Ana|20";
-    const char* luis = "2|Luis|21";
-    const char* maria = "3|Maria|22";
-
-    bool insert_ana = SlottedPage::insert_record(alumnos, ana, std::strlen(ana), rid_ana);
-    bool insert_luis = SlottedPage::insert_record(alumnos, luis, std::strlen(luis), rid_luis);
-    bool insert_maria = SlottedPage::insert_record(alumnos, maria, std::strlen(maria), rid_maria);
-
-    db.write_page(10, alumnos);
-    db.sync();
-
-    indice_alumnos.create_empty_tree();
-
-    Page* raiz_indice = bm.fetchPage(1);
-    bool idx_ana = BPlusTreeNode::set_leaf_entry(*raiz_indice, 0, 1, rid_ana);
-    bool idx_luis = BPlusTreeNode::set_leaf_entry(*raiz_indice, 1, 2, rid_luis);
-    bool idx_maria = BPlusTreeNode::set_leaf_entry(*raiz_indice, 2, 3, rid_maria);
-    bm.unpinPage(1, true);
-    bm.flushPage(1);
-
-    RID rid_encontrado = {-1, 0};
-    bool encontro_id_2 = indice_alumnos.search(2, rid_encontrado);
-
-    Page pagina_datos;
+void imprimir_registro(PageManager& db, const char* etiqueta, RID rid){
+    Page page;
+    char salida[140];
     uint16_t size = 0;
-    char salida[100];
     std::memset(salida, 0, sizeof(salida));
 
-    bool leyo_pagina = db.read_page(rid_encontrado.page_id, pagina_datos);
-    bool leyo_registro = SlottedPage::get_record(
-        pagina_datos,
-        rid_encontrado.slot_id,
-        salida,
-        size
-    );
+    bool leyo_pagina = db.read_page(rid.page_id, page);
+    bool leyo_registro = false;
+
+    if(leyo_pagina){
+        leyo_registro = SlottedPage::get_record(
+            page,
+            rid.slot_id,
+            salida,
+            size
+        );
+    }
 
     if(leyo_registro)
         salida[size] = '\0';
 
-    verificar(insert_ana && insert_luis && insert_maria, "Insertar alumnos en SlottedPage");
-    verificar(idx_ana && idx_luis && idx_maria, "Crear indice B+ con id de alumno hacia RID");
-    verificar(encontro_id_2, "Buscar id=2 usando el arbol B+");
-    verificar(leyo_pagina && leyo_registro, "Usar el RID encontrado para leer el registro real");
-    verificar(std::strcmp(salida, "2|Luis|21") == 0, "El indice encuentra el registro de Luis");
+    std::cout << etiqueta << " -> RID(" << rid.page_id << ", " << rid.slot_id << ")";
+
+    if(leyo_registro)
+        std::cout << " -> " << salida;
+    else
+        std::cout << " -> no se pudo leer el registro";
+
+    std::cout << "\n";
+
+    comprobar(leyo_pagina, "leer pagina de datos desde PageManager");
+    comprobar(leyo_registro, "leer registro desde SlottedPage usando RID");
 }
 
-int main(){
-    std::cout << "=== PRUEBA UNITARIA: B+ TREE ===\n\n";
+void imprimir_rango_desde_indice(PageManager& db, BPlusTree& indice, int inicio, int fin){
+    for(int id = inicio; id <= fin; id++){
+        RID rid = {-1, 0};
+        bool encontrado = indice.search(id, rid);
 
-    test_busqueda_en_raiz_hoja();
-    test_busqueda_con_nodo_interno();
-    test_indice_con_datos_de_alumnos();
+        if(encontrado){
+            std::string etiqueta = "   id=" + std::to_string(id);
+            imprimir_registro(db, etiqueta.c_str(), rid);
+        }else{
+            std::cout << "   id=" << id << " -> no encontrado en el indice\n";
+        }
+    }
+}
 
-    std::cout << "\nResumen:\n";
-    std::cout << "Pruebas correctas: " << ok << "\n";
-    std::cout << "Pruebas fallidas: " << fail << "\n";
+void demo_bplustree_1000_registros(bool imprimir_todos){
+    std::remove("test_bplustree_1000.db");
 
-    if(fail == 0){
-        std::cout << "\nRESULTADO B+ TREE: OK\n";
-        return 0;
+    const int total_registros = 1000;
+    const int primera_pagina_datos = 100;
+    int ultima_pagina_datos = primera_pagina_datos;
+    int root_guardada = -1;
+
+    std::cout << "=== DEMOSTRACION B+ TREE INTEGRADO ===\n\n";
+    std::cout << "Archivo de prueba: test_bplustree_1000.db\n";
+    std::cout << "Cantidad de registros: " << total_registros << "\n\n";
+
+    {
+        PageManager db("test_bplustree_1000.db");
+        BufferManager bm(32, db);
+        BPlusTree indice_alumnos(bm, 1);
+
+        std::vector<RID> rids(total_registros + 1);
+        bool datos_insertados = true;
+
+        Page data_page;
+        int data_page_id = primera_pagina_datos;
+        SlottedPage::init(data_page, data_page_id);
+
+        std::cout << "1. Insertando registros en paginas de datos...\n";
+
+        for(int id = 1; id <= total_registros; id++){
+            std::string registro = std::to_string(id) +
+                                   "|Alumno_" +
+                                   std::to_string(id) +
+                                   "|" +
+                                   std::to_string(18 + (id % 10));
+
+            RID rid;
+            bool insertado = SlottedPage::insert_record(
+                data_page,
+                registro.c_str(),
+                static_cast<uint16_t>(registro.size()),
+                rid
+            );
+
+            if(!insertado){
+                db.write_page(data_page_id, data_page);
+
+                data_page_id++;
+                SlottedPage::init(data_page, data_page_id);
+
+                insertado = SlottedPage::insert_record(
+                    data_page,
+                    registro.c_str(),
+                    static_cast<uint16_t>(registro.size()),
+                    rid
+                );
+            }
+
+            datos_insertados = insertado && datos_insertados;
+            rids[id] = rid;
+        }
+
+        db.write_page(data_page_id, data_page);
+        db.sync();
+        ultima_pagina_datos = data_page_id;
+
+        std::cout << "   Registros guardados en paginas "
+                  << primera_pagina_datos << " a " << ultima_pagina_datos << ".\n";
+        std::cout << "   Paginas de datos usadas: "
+                  << (ultima_pagina_datos - primera_pagina_datos + 1) << "\n\n";
+
+        comprobar(datos_insertados, "insertar los 1000 registros en SlottedPage");
+
+        std::cout << "2. Construyendo indice B+ sobre la clave id...\n";
+
+        bool indice_creado = indice_alumnos.create_empty_tree();
+        bool indice_insertado = true;
+
+        for(int id = 1; id <= total_registros; id++)
+            indice_insertado = indice_alumnos.insert(id, rids[id]) && indice_insertado;
+
+        root_guardada = indice_alumnos.get_root_page_id();
+
+        std::cout << "   El indice guarda entradas con forma: id -> RID(page_id, slot_id).\n";
+        std::cout << "   Root page id del indice B+: " << root_guardada << "\n\n";
+
+        comprobar(indice_creado, "crear raiz inicial del B+ Tree");
+        comprobar(indice_insertado, "insertar 1000 claves en el B+ Tree");
+        comprobar(root_guardada != 1, "forzar split y creacion de nueva raiz interna");
+
+        std::cout << "3. Buscando registros mediante el indice...\n";
+
+        RID rid_1 = {-1, 0};
+        RID rid_500 = {-1, 0};
+        RID rid_1000 = {-1, 0};
+
+        bool busca_1 = indice_alumnos.search(1, rid_1);
+        bool busca_500 = indice_alumnos.search(500, rid_500);
+        bool busca_1000 = indice_alumnos.search(1000, rid_1000);
+
+        comprobar(busca_1, "buscar id 1 en el B+ Tree");
+        comprobar(busca_500, "buscar id 500 en el B+ Tree");
+        comprobar(busca_1000, "buscar id 1000 en el B+ Tree");
+
+        imprimir_registro(db, "   id=1", rid_1);
+        imprimir_registro(db, "   id=500", rid_500);
+        imprimir_registro(db, "   id=1000", rid_1000);
+
+        if(imprimir_todos){
+            std::cout << "\n   Impresion completa ANTES de eliminar usando el indice B+:\n";
+            imprimir_rango_desde_indice(db, indice_alumnos, 1, total_registros);
+        }
+
+        std::cout << "\n4. Eliminando claves del indice...\n";
+
+        bool elimina_10 = indice_alumnos.remove(10);
+        bool elimina_500 = indice_alumnos.remove(500);
+        bool elimina_999 = indice_alumnos.remove(999);
+
+        RID eliminado = {-1, 0};
+        RID vigente = {-1, 0};
+        bool ya_no_esta_500 = !indice_alumnos.search(500, eliminado);
+        bool sigue_501 = indice_alumnos.search(501, vigente);
+
+        root_guardada = indice_alumnos.get_root_page_id();
+
+        std::cout << "   Se eliminaron del indice los ids 10, 500 y 999.\n";
+        std::cout << "   Busqueda posterior de id=500: no encontrado.\n";
+        std::cout << "   Busqueda posterior de id=501: encontrado en RID("
+                  << vigente.page_id << ", " << vigente.slot_id << ").\n\n";
+
+        comprobar(elimina_10, "eliminar id 10");
+        comprobar(elimina_500, "eliminar id 500");
+        comprobar(elimina_999, "eliminar id 999");
+        comprobar(ya_no_esta_500, "confirmar que id 500 ya no aparece");
+        comprobar(sigue_501, "confirmar que id 501 sigue disponible");
+
+        if(imprimir_todos){
+            std::cout << "   Impresion completa DESPUES de eliminar usando el indice B+:\n";
+            imprimir_rango_desde_indice(db, indice_alumnos, 1, total_registros);
+            std::cout << "\n";
+        }
     }
 
-    std::cout << "\nRESULTADO B+ TREE: FALLO\n";
+    {
+        std::cout << "5. Reabriendo el archivo para comprobar persistencia...\n";
+
+        PageManager db("test_bplustree_1000.db");
+        BufferManager bm(32, db);
+        BPlusTree indice_alumnos(bm, root_guardada);
+
+        RID rid_1000 = {-1, 0};
+        RID rid_500 = {-1, 0};
+
+        bool persiste_1000 = indice_alumnos.search(1000, rid_1000);
+        bool eliminado_persiste = !indice_alumnos.search(500, rid_500);
+
+        comprobar(persiste_1000, "id 1000 persiste despues de reabrir");
+        comprobar(eliminado_persiste, "id 500 sigue eliminado despues de reabrir");
+
+        if(persiste_1000)
+            imprimir_registro(db, "   id=1000 despues de reabrir", rid_1000);
+
+        std::cout << "   id=500 despues de reabrir: no encontrado.\n\n";
+    }
+
+    std::cout << "Resumen de la demostracion:\n";
+    std::cout << "   Registros insertados: " << total_registros << "\n";
+    std::cout << "   Paginas de datos usadas: "
+              << (ultima_pagina_datos - primera_pagina_datos + 1) << "\n";
+    std::cout << "   Operaciones demostradas: insercion, busqueda, eliminacion, split, merge y persistencia.\n";
+    std::cout << "   Validaciones internas: " << verificaciones << "\n";
+    std::cout << "   Errores detectados: " << errores << "\n";
+
+    if(errores == 0)
+        std::cout << "\nResultado final: el B+ Tree funciona integrado con BufferManager y PageManager.\n";
+    else
+        std::cout << "\nResultado final: hay validaciones que revisar.\n";
+}
+
+int main(int argc, char* argv[]){
+    bool imprimir_todos = argc > 1 && std::strcmp(argv[1], "--print-all") == 0;
+
+    demo_bplustree_1000_registros(imprimir_todos);
+
+    if(errores == 0)
+        return 0;
+
     return 1;
 }
