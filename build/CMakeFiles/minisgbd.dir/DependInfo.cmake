@@ -13,6 +13,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspaces/Mini_SGBD/src/JournalManager.cpp" "CMakeFiles/minisgbd.dir/src/JournalManager.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/JournalManager.cpp.o.d"
   "/workspaces/Mini_SGBD/src/PageManager.cpp" "CMakeFiles/minisgbd.dir/src/PageManager.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/PageManager.cpp.o.d"
   "/workspaces/Mini_SGBD/src/SlottedPage.cpp" "CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o.d"
+  "/workspaces/Mini_SGBD/src/Table.cpp" "CMakeFiles/minisgbd.dir/src/Table.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/Table.cpp.o.d"
   "/workspaces/Mini_SGBD/src/main.cpp" "CMakeFiles/minisgbd.dir/src/main.cpp.o" "gcc" "CMakeFiles/minisgbd.dir/src/main.cpp.o.d"
   )
 

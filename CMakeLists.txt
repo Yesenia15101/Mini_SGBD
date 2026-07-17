@@ -9,4 +9,5 @@ add_executable(minisgbd
     src/SlottedPage.cpp
     src/BufferManager.cpp
     src/BPlusTree.cpp
+    src/Table.cpp
 )

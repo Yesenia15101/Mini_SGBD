@@ -249,6 +249,30 @@ src/SlottedPage.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.s
 .PHONY : src/SlottedPage.cpp.s
 
+src/Table.o: src/Table.cpp.o
+.PHONY : src/Table.o
+
+# target to build an object file
+src/Table.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Table.cpp.o
+.PHONY : src/Table.cpp.o
+
+src/Table.i: src/Table.cpp.i
+.PHONY : src/Table.i
+
+# target to preprocess a source file
+src/Table.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Table.cpp.i
+.PHONY : src/Table.cpp.i
+
+src/Table.s: src/Table.cpp.s
+.PHONY : src/Table.s
+
+# target to generate assembly for a file
+src/Table.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Table.cpp.s
+.PHONY : src/Table.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -297,6 +321,9 @@ help:
 	@echo "... src/SlottedPage.o"
 	@echo "... src/SlottedPage.i"
 	@echo "... src/SlottedPage.s"
+	@echo "... src/Table.o"
+	@echo "... src/Table.i"
+	@echo "... src/Table.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

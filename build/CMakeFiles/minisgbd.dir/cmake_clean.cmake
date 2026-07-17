@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/minisgbd.dir/src/PageManager.cpp.o.d"
   "CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o"
   "CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o.d"
+  "CMakeFiles/minisgbd.dir/src/Table.cpp.o"
+  "CMakeFiles/minisgbd.dir/src/Table.cpp.o.d"
   "CMakeFiles/minisgbd.dir/src/main.cpp.o"
   "CMakeFiles/minisgbd.dir/src/main.cpp.o.d"
   "minisgbd"
