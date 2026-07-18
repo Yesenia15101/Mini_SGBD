@@ -167,6 +167,48 @@ CMakeFiles/minisgbd.dir/src/Table.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/minisgbd.dir/src/Table.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/Mini_SGBD/src/Table.cpp -o CMakeFiles/minisgbd.dir/src/Table.cpp.s
 
+CMakeFiles/minisgbd.dir/src/Catalog.cpp.o: CMakeFiles/minisgbd.dir/flags.make
+CMakeFiles/minisgbd.dir/src/Catalog.cpp.o: /workspaces/Mini_SGBD/src/Catalog.cpp
+CMakeFiles/minisgbd.dir/src/Catalog.cpp.o: CMakeFiles/minisgbd.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/Mini_SGBD/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/minisgbd.dir/src/Catalog.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/minisgbd.dir/src/Catalog.cpp.o -MF CMakeFiles/minisgbd.dir/src/Catalog.cpp.o.d -o CMakeFiles/minisgbd.dir/src/Catalog.cpp.o -c /workspaces/Mini_SGBD/src/Catalog.cpp
+
+CMakeFiles/minisgbd.dir/src/Catalog.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/minisgbd.dir/src/Catalog.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/Mini_SGBD/src/Catalog.cpp > CMakeFiles/minisgbd.dir/src/Catalog.cpp.i
+
+CMakeFiles/minisgbd.dir/src/Catalog.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/minisgbd.dir/src/Catalog.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/Mini_SGBD/src/Catalog.cpp -o CMakeFiles/minisgbd.dir/src/Catalog.cpp.s
+
+CMakeFiles/minisgbd.dir/src/Scan.cpp.o: CMakeFiles/minisgbd.dir/flags.make
+CMakeFiles/minisgbd.dir/src/Scan.cpp.o: /workspaces/Mini_SGBD/src/Scan.cpp
+CMakeFiles/minisgbd.dir/src/Scan.cpp.o: CMakeFiles/minisgbd.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/Mini_SGBD/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/minisgbd.dir/src/Scan.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/minisgbd.dir/src/Scan.cpp.o -MF CMakeFiles/minisgbd.dir/src/Scan.cpp.o.d -o CMakeFiles/minisgbd.dir/src/Scan.cpp.o -c /workspaces/Mini_SGBD/src/Scan.cpp
+
+CMakeFiles/minisgbd.dir/src/Scan.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/minisgbd.dir/src/Scan.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/Mini_SGBD/src/Scan.cpp > CMakeFiles/minisgbd.dir/src/Scan.cpp.i
+
+CMakeFiles/minisgbd.dir/src/Scan.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/minisgbd.dir/src/Scan.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/Mini_SGBD/src/Scan.cpp -o CMakeFiles/minisgbd.dir/src/Scan.cpp.s
+
+CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o: CMakeFiles/minisgbd.dir/flags.make
+CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o: /workspaces/Mini_SGBD/src/NestedLoopJoin.cpp
+CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o: CMakeFiles/minisgbd.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/Mini_SGBD/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o -MF CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o.d -o CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o -c /workspaces/Mini_SGBD/src/NestedLoopJoin.cpp
+
+CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/Mini_SGBD/src/NestedLoopJoin.cpp > CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.i
+
+CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/Mini_SGBD/src/NestedLoopJoin.cpp -o CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.s
+
 # Object files for target minisgbd
 minisgbd_OBJECTS = \
 "CMakeFiles/minisgbd.dir/src/main.cpp.o" \
@@ -175,7 +217,10 @@ minisgbd_OBJECTS = \
 "CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o" \
 "CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o" \
 "CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o" \
-"CMakeFiles/minisgbd.dir/src/Table.cpp.o"
+"CMakeFiles/minisgbd.dir/src/Table.cpp.o" \
+"CMakeFiles/minisgbd.dir/src/Catalog.cpp.o" \
+"CMakeFiles/minisgbd.dir/src/Scan.cpp.o" \
+"CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o"
 
 # External object files for target minisgbd
 minisgbd_EXTERNAL_OBJECTS =
@@ -187,9 +232,12 @@ minisgbd: CMakeFiles/minisgbd.dir/src/SlottedPage.cpp.o
 minisgbd: CMakeFiles/minisgbd.dir/src/BufferManager.cpp.o
 minisgbd: CMakeFiles/minisgbd.dir/src/BPlusTree.cpp.o
 minisgbd: CMakeFiles/minisgbd.dir/src/Table.cpp.o
+minisgbd: CMakeFiles/minisgbd.dir/src/Catalog.cpp.o
+minisgbd: CMakeFiles/minisgbd.dir/src/Scan.cpp.o
+minisgbd: CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o
 minisgbd: CMakeFiles/minisgbd.dir/build.make
 minisgbd: CMakeFiles/minisgbd.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/Mini_SGBD/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable minisgbd"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/Mini_SGBD/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable minisgbd"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/minisgbd.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

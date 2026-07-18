@@ -177,6 +177,30 @@ src/BufferManager.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/BufferManager.cpp.s
 .PHONY : src/BufferManager.cpp.s
 
+src/Catalog.o: src/Catalog.cpp.o
+.PHONY : src/Catalog.o
+
+# target to build an object file
+src/Catalog.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Catalog.cpp.o
+.PHONY : src/Catalog.cpp.o
+
+src/Catalog.i: src/Catalog.cpp.i
+.PHONY : src/Catalog.i
+
+# target to preprocess a source file
+src/Catalog.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Catalog.cpp.i
+.PHONY : src/Catalog.cpp.i
+
+src/Catalog.s: src/Catalog.cpp.s
+.PHONY : src/Catalog.s
+
+# target to generate assembly for a file
+src/Catalog.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Catalog.cpp.s
+.PHONY : src/Catalog.cpp.s
+
 src/JournalManager.o: src/JournalManager.cpp.o
 .PHONY : src/JournalManager.o
 
@@ -201,6 +225,30 @@ src/JournalManager.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/JournalManager.cpp.s
 .PHONY : src/JournalManager.cpp.s
 
+src/NestedLoopJoin.o: src/NestedLoopJoin.cpp.o
+.PHONY : src/NestedLoopJoin.o
+
+# target to build an object file
+src/NestedLoopJoin.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.o
+.PHONY : src/NestedLoopJoin.cpp.o
+
+src/NestedLoopJoin.i: src/NestedLoopJoin.cpp.i
+.PHONY : src/NestedLoopJoin.i
+
+# target to preprocess a source file
+src/NestedLoopJoin.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.i
+.PHONY : src/NestedLoopJoin.cpp.i
+
+src/NestedLoopJoin.s: src/NestedLoopJoin.cpp.s
+.PHONY : src/NestedLoopJoin.s
+
+# target to generate assembly for a file
+src/NestedLoopJoin.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/NestedLoopJoin.cpp.s
+.PHONY : src/NestedLoopJoin.cpp.s
+
 src/PageManager.o: src/PageManager.cpp.o
 .PHONY : src/PageManager.o
 
@@ -224,6 +272,30 @@ src/PageManager.s: src/PageManager.cpp.s
 src/PageManager.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/PageManager.cpp.s
 .PHONY : src/PageManager.cpp.s
+
+src/Scan.o: src/Scan.cpp.o
+.PHONY : src/Scan.o
+
+# target to build an object file
+src/Scan.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Scan.cpp.o
+.PHONY : src/Scan.cpp.o
+
+src/Scan.i: src/Scan.cpp.i
+.PHONY : src/Scan.i
+
+# target to preprocess a source file
+src/Scan.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Scan.cpp.i
+.PHONY : src/Scan.cpp.i
+
+src/Scan.s: src/Scan.cpp.s
+.PHONY : src/Scan.s
+
+# target to generate assembly for a file
+src/Scan.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/minisgbd.dir/build.make CMakeFiles/minisgbd.dir/src/Scan.cpp.s
+.PHONY : src/Scan.cpp.s
 
 src/SlottedPage.o: src/SlottedPage.cpp.o
 .PHONY : src/SlottedPage.o
@@ -312,12 +384,21 @@ help:
 	@echo "... src/BufferManager.o"
 	@echo "... src/BufferManager.i"
 	@echo "... src/BufferManager.s"
+	@echo "... src/Catalog.o"
+	@echo "... src/Catalog.i"
+	@echo "... src/Catalog.s"
 	@echo "... src/JournalManager.o"
 	@echo "... src/JournalManager.i"
 	@echo "... src/JournalManager.s"
+	@echo "... src/NestedLoopJoin.o"
+	@echo "... src/NestedLoopJoin.i"
+	@echo "... src/NestedLoopJoin.s"
 	@echo "... src/PageManager.o"
 	@echo "... src/PageManager.i"
 	@echo "... src/PageManager.s"
+	@echo "... src/Scan.o"
+	@echo "... src/Scan.i"
+	@echo "... src/Scan.s"
 	@echo "... src/SlottedPage.o"
 	@echo "... src/SlottedPage.i"
 	@echo "... src/SlottedPage.s"

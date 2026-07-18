@@ -10,4 +10,7 @@ add_executable(minisgbd
     src/BufferManager.cpp
     src/BPlusTree.cpp
     src/Table.cpp
+    src/Catalog.cpp
+    src/Scan.cpp
+    src/NestedLoopJoin.cpp
 )

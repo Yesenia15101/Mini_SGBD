@@ -1,6 +1,7 @@
 #include "../include/BufferManager.h"
 
-BufferManager::BufferManager( int pool_size, PageManager& pm ): disk(pm), clock(0) {
+BufferManager::BufferManager( int pool_size, PageManager& pm )
+    : disk(pm), clock(0), hit_count(0), miss_count(0) {
     pool.resize(pool_size);
 }
 
@@ -13,6 +14,8 @@ Page* BufferManager::fetchPage(int page_id) {
 
         frame.last_used = clock++;
         frame.pin_count++;
+
+        hit_count++; // la pagina ya estaba en memoria: ACIERTO
 
         return &frame.page;
     }
@@ -30,6 +33,8 @@ Page* BufferManager::fetchPage(int page_id) {
             pool[i].dirty = false;
 
             page_table[page_id] = i;
+
+            miss_count++; // hubo que leer de disco: FALLO
 
             return &pool[i].page;
         }
@@ -62,6 +67,8 @@ Page* BufferManager::fetchPage(int page_id) {
     pool[victim].occupied = true;
 
     page_table[page_id] = victim;
+
+    miss_count++; // hubo que desalojar y leer de disco: FALLO
 
     return &pool[victim].page;
 }
