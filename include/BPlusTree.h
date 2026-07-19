@@ -2,6 +2,7 @@
 #define BPLUSTREE_H
 
 #include <cstdint>
+#include <vector>
 #include "BufferManager.h"
 #include "Page.h"
 
@@ -77,6 +78,7 @@ public:
 
     bool create_empty_tree();
     bool search(int key, RID& rid);
+    bool searchRange(int start_key, int end_key, std::vector<RID>& rids);
     bool insert(int key,RID rid);
     bool remove(int key);
     

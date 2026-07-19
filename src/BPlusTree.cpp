@@ -267,6 +267,58 @@ bool BPlusTree::search(int key, RID& rid){
         current_page_id = next_page_id;
     }
 }
+
+bool BPlusTree::searchRange(int start_key, int end_key, std::vector<RID>& rids){
+    if(start_key > end_key)
+        return false;
+
+    int leaf_page_id = -1;
+    Page* leaf = find_leaf(start_key, leaf_page_id);
+
+    if(leaf == nullptr)
+        return false;
+
+    bool found_any = false;
+
+    while(leaf != nullptr){
+        uint16_t count = BPlusTreeNode::key_count(*leaf);
+        int next_page = leaf->next_page;
+        bool should_continue = next_page != -1;
+
+        for(uint16_t i = 0; i < count; i++){
+            BPlusTreeNode::LeafEntry entry;
+
+            if(!BPlusTreeNode::get_leaf_entry(*leaf, i, entry)){
+                buffer.unpinPage(leaf_page_id, false);
+                return found_any;
+            }
+
+            if(entry.key > end_key){
+                buffer.unpinPage(leaf_page_id, false);
+                return found_any;
+            }
+
+            if(entry.key >= start_key){
+                rids.push_back(entry.rid);
+                found_any = true;
+            }
+        }
+
+        buffer.unpinPage(leaf_page_id, false);
+
+        if(!should_continue)
+            break;
+
+        leaf_page_id = next_page;
+        leaf = buffer.fetchPage(leaf_page_id);
+
+        if(leaf == nullptr)
+            break;
+    }
+
+    return found_any;
+}
+
 Page* BPlusTree::find_leaf(int key, int& leaf_page_id){
 
     leaf_page_id = root_page_id;

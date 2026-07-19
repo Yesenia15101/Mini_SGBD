@@ -352,3 +352,184 @@ La eliminacion y merging estan implementados de forma simplificada. La fusion de
 - Guardado permanente del `root_page_id` en una pagina de metadatos.
 
 Estas mejoras permitirian que el arbol B+ soporte casos mas complejos de eliminacion.
+
+## Capitulo 3.12: Demostracion Hospitalaria con Indices Secundarios
+
+Se agrego una demostracion con 1000 registros de pacientes. Cada registro tiene el siguiente formato logico:
+
+```text
+idPaciente|dni|nombres|apellidos|edad|sexo|tipoSangre|idEspecialidad|especialidad|prioridad
+```
+
+Ejemplo:
+
+```text
+500|70000500|Alejandro|Vargas Condori|51|F|A-|1|Emergencia|1
+```
+
+### Indices implementados
+
+La demostracion construye varios indices B+:
+
+- Indice primario por `idPaciente`.
+- Indice secundario unico por `dni`.
+- Indice secundario por `idEspecialidad`, mostrando el nombre de la especialidad al usuario.
+- Indice secundario por `prioridad`.
+- Indice secundario por `tipoSangre`.
+
+Los indices secundarios con valores repetidos usan una clave compuesta:
+
+```text
+claveCompuesta = valorDelCampo * 100000 + idPaciente
+```
+
+Esto permite que varios pacientes tengan la misma especialidad, prioridad o tipo de sangre sin chocar dentro del B+ Tree.
+
+### Consultas WHERE demostradas
+
+La demo ejecuta consultas como:
+
+```sql
+SELECT * FROM pacientes WHERE idPaciente = 500;
+SELECT * FROM pacientes WHERE dni = 70000777;
+SELECT * FROM pacientes WHERE especialidad = 'Neurologia';
+SELECT * FROM pacientes WHERE prioridad = 1;
+SELECT * FROM pacientes WHERE tipoSangre = 'AB+';
+```
+
+En estas consultas no se hace escaneo completo de la tabla. El flujo es:
+
+```text
+WHERE
+  -> B+ Tree del campo consultado
+  -> RID(page_id, slot_id)
+  -> BufferManager.fetchPage(page_id)
+  -> SlottedPage.get_record(slot_id)
+  -> registro real del paciente
+```
+
+Para el caso de especialidad, el usuario consulta por texto, pero internamente se traduce a un codigo numerico:
+
+```text
+Neurologia -> idEspecialidad = 4
+```
+
+Luego se consulta el indice B+ secundario por `idEspecialidad`.
+
+### Splay Tree en el Buffer Manager
+
+El Buffer Manager mantiene LRU como politica principal de reemplazo. Para no alterar la politica base, el Splay Tree se usa como herramienta de diagnostico de paginas calientes.
+
+Se agrego un Splay Tree para registrar paginas calientes. Cada vez que se llama a `fetchPage`, el Buffer Manager registra el acceso a esa pagina. Luego se pueden mostrar las paginas con mas accesos.
+
+Esto sirve para observar patrones de uso del Buffer Pool:
+
+```text
+Pagina 114 -> 665 accesos
+Pagina 116 -> 665 accesos
+Pagina 3   -> 580 accesos
+```
+
+La idea es:
+
+- LRU decide que pagina se reemplaza.
+- Splay Tree identifica paginas muy consultadas.
+- El reporte del Buffer Manager indica si la victima LRU es una pagina caliente.
+- Tambien se implemento una estrategia alternativa `Splay/pagina fria`, que elegiria la pagina con menos accesos acumulados.
+- La demostracion compara que pagina sacaria LRU y que pagina sacaria Splay/pagina fria.
+- En esta version, LRU sigue siendo el reemplazo activo para conservar la politica base, pero la comparacion permite explicar el impacto de usar frecuencia de acceso.
+
+Esto se puede explicar como:
+
+```text
+LRU comparado con reemplazo Splay/pagina fria
+```
+
+### Comando de ejecucion
+
+En Windows:
+
+```powershell
+.\run_hospital.bat
+```
+
+Para imprimir todos los pacientes:
+
+```powershell
+.\run_hospital.bat --print-all
+```
+
+En Codespace:
+
+```bash
+g++ -std=c++17 -I include tests/demo_hospital_indices.cpp src/PageManager.cpp src/BufferManager.cpp src/BPlusTree.cpp src/SlottedPage.cpp -o demo_hospital_indices
+./demo_hospital_indices
+```
+
+## Capitulo 3.13: Asesor Adaptativo de Indices
+
+Se agrego un asesor adaptativo de indices para analizar las consultas realizadas por el usuario. Este componente no ejecuta la consulta, sino que observa su comportamiento y recomienda si conviene mantener o crear indices secundarios.
+
+El asesor registra:
+
+- Campo consultado en el `WHERE`.
+- Cantidad de veces que se consulta el campo.
+- Cantidad promedio de resultados.
+- Selectividad estimada.
+- Costo estimado sin indice.
+- Costo observado o estimado con la estrategia actual.
+- Si el campo ya tiene indice B+.
+
+La selectividad se interpreta asi:
+
+```text
+selectividad = resultados_promedio / total_registros
+```
+
+Mientras mas baja sea la selectividad, mas conveniente suele ser un indice.
+
+Ejemplos:
+
+```text
+dni:
+    devuelve 1 paciente de 1000
+    selectividad = 0.001
+    recomendable para indice
+
+sexo:
+    devuelve 500 pacientes de 1000
+    selectividad = 0.5
+    no conviene mucho crear indice
+
+edad:
+    devuelve pocos pacientes
+    si se consulta varias veces, el asesor recomienda crear indice
+```
+
+### Comando ADVISOR
+
+En la consola hospitalaria se puede ejecutar:
+
+```text
+ADVISOR
+```
+
+Ejemplo de salida:
+
+```text
+Campo: edad
+   Consultas observadas: 2
+   Promedio de resultados: 11
+   Selectividad estimada: 0.011
+   Estado: no tiene indice secundario.
+   Recomendacion: crear indice B+ secundario para este campo.
+
+Campo: sexo
+   Consultas observadas: 1
+   Promedio de resultados: 500
+   Selectividad estimada: 0.5
+   Estado: no tiene indice secundario.
+   Recomendacion: no crear indice por ahora, baja selectividad.
+```
+
+Esto permite explicar que el sistema no crea indices para todos los campos sin criterio, sino que analiza frecuencia, costo y selectividad.
